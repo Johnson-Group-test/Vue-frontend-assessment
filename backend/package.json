@@ -5,10 +5,14 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "node --watch server.js",
+    "dev": "node server.js",
     "start": "node server.js"
   },
-  "keywords": ["api", "express", "campaign"],
+  "keywords": [
+    "api",
+    "express",
+    "campaign"
+  ],
   "author": "Johnson Group",
   "license": "ISC",
   "dependencies": {
