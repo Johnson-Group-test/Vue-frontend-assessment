@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, shallowRef } from 'vue'
 import campaignService from '@/services/campaignService'
 import { ERROR_CODES, HTTP_STATUS } from '@/constants'
+import { getErrorMessage } from '@/utils/errorMessages'
 
 export const useCampaignsStore = defineStore('campaigns', () => {
   // ========== State ==========
@@ -146,7 +147,7 @@ export const useCampaignsStore = defineStore('campaigns', () => {
       
       error.value = null
     } catch (err) {
-      error.value = err?.error?.message || 'Failed to load campaigns. Please try again.'
+      error.value = getErrorMessage(err, 'Failed to load campaigns. Please try again.')
       console.error('Error fetching campaigns:', err)
       campaigns.value = []
     } finally {
@@ -198,7 +199,7 @@ export const useCampaignsStore = defineStore('campaigns', () => {
         notFound.value = true
         error.value = null
       } else {
-        error.value = err?.error?.message || 'Failed to load campaign. Please try again.'
+        error.value = getErrorMessage(err, 'Failed to load campaign. Please try again.')
         notFound.value = false
       }
       console.error('Error fetching campaign:', err)
@@ -231,7 +232,7 @@ export const useCampaignsStore = defineStore('campaigns', () => {
       error.value = null
       return newCampaign
     } catch (err) {
-      error.value = err?.error?.message || 'Failed to create campaign. Please try again.'
+      error.value = getErrorMessage(err, 'Failed to create campaign. Please try again.')
       console.error('Error creating campaign:', err)
       throw err
     } finally {
@@ -269,7 +270,7 @@ export const useCampaignsStore = defineStore('campaigns', () => {
       error.value = null
       return updatedCampaign
     } catch (err) {
-      error.value = err?.error?.message || 'Failed to update campaign. Please try again.'
+      error.value = getErrorMessage(err, 'Failed to update campaign. Please try again.')
       console.error('Error updating campaign:', err)
       throw err
     } finally {
@@ -302,7 +303,7 @@ export const useCampaignsStore = defineStore('campaigns', () => {
       
       error.value = null
     } catch (err) {
-      error.value = err?.error?.message || 'Failed to delete campaign. Please try again.'
+      error.value = getErrorMessage(err, 'Failed to delete campaign. Please try again.')
       console.error('Error deleting campaign:', err)
       throw err
     } finally {

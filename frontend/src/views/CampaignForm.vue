@@ -24,19 +24,29 @@
           size="md"
         />
 
-        <ErrorAlert
-          v-else-if="error"
-          :message="error"
-          :retryable="false"
-        />
+        <template v-else>
+          <!-- Show error alert above form if there's a loading/initial error and form is not visible -->
+          <ErrorAlert
+            v-if="error && !formVisible"
+            :message="error"
+            :retryable="false"
+          />
 
-        <form
-          v-else
-          @submit.prevent="submitForm"
-          class="campaign-form-content"
-          :aria-label="formAriaLabel"
-          novalidate
-        >
+          <!-- Always show form when not loading, even if there are submission errors -->
+          <form
+            v-if="formVisible || !error"
+            @submit.prevent="submitForm"
+            class="campaign-form-content"
+            :aria-label="formAriaLabel"
+            novalidate
+          >
+            <!-- Show submission errors at top of form -->
+            <ErrorAlert
+              v-if="error && formVisible"
+              :message="error"
+              :retryable="false"
+              class="form-error-alert"
+            />
         <FormInput
           id="name"
           v-model="formData.name"
@@ -134,6 +144,7 @@
           </button>
         </div>
       </form>
+        </template>
       </div>
     </div>
   </div>
@@ -146,6 +157,7 @@ import { useCampaignsStore } from '@/stores/campaigns'
 import { storeToRefs } from 'pinia'
 import { useFormValidation, useStatusClass } from '@/composables'
 import { FORM_DEFAULTS } from '@/constants'
+import { getErrorMessage, getValidationErrors } from '@/utils/errorMessages'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
@@ -219,6 +231,17 @@ const error = computed(() => {
   return storeError.value || localError.value
 })
 
+// Determine if form should be visible
+// Form is visible if we have campaign data (edit mode) or we're in create mode
+const formVisible = computed(() => {
+  // In edit mode, form is visible if we have campaign data or if there's no loading error
+  if (isEditMode.value) {
+    return !loadingCampaign.value && (store.currentCampaign || !error.value)
+  }
+  // In create mode, form is always visible when not loading
+  return !loadingCampaign.value
+})
+
 // Handle field blur validation
 const handleFieldBlur = (fieldName, value, additionalValue = null) => {
   validateField(fieldName, value, additionalValue)
@@ -263,7 +286,7 @@ const loadCampaignData = async (id) => {
       }, 2000)
     }
   } catch (err) {
-    localError.value = err?.error?.message || 'Failed to load campaign. Please try again.'
+    localError.value = getErrorMessage(err, 'Failed to load campaign. Please try again.')
     console.error('Error loading campaign:', err)
   } finally {
     loadingCampaign.value = false
@@ -320,17 +343,19 @@ const submitForm = async () => {
     }
   } catch (err) {
     // Handle API errors
-    if (err?.error?.errors) {
+    const validationErrors = getValidationErrors(err)
+    
+    if (Object.keys(validationErrors).length > 0) {
       // Set validation errors from server
-      Object.keys(err.error.errors).forEach((field) => {
-        errors.value[field] = err.error.errors[field]
+      Object.keys(validationErrors).forEach((field) => {
+        errors.value[field] = validationErrors[field]
       })
     } else {
-      const errorMessage = err?.error?.message || 
-        (isEditMode.value 
-          ? 'Failed to update campaign. Please try again.' 
-          : 'Failed to create campaign. Please try again.')
-      localError.value = errorMessage
+      // Use error message utility for consistent error messages
+      const fallbackMessage = isEditMode.value 
+        ? 'Failed to update campaign. Please try again.' 
+        : 'Failed to create campaign. Please try again.'
+      localError.value = getErrorMessage(err, fallbackMessage)
     }
     console.error(`Error ${isEditMode.value ? 'updating' : 'creating'} campaign:`, err)
   } finally {
@@ -403,6 +428,10 @@ const submitForm = async () => {
 
 .btn-secondary:hover:not(:disabled) {
   background: var(--color-gray-200);
+}
+
+.form-error-alert {
+  margin-bottom: var(--spacing-6);
 }
 
 /* Responsive Design */

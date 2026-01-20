@@ -83,12 +83,27 @@ export const STORAGE_KEYS = {
 // Error Codes
 export const ERROR_CODES = {
   NETWORK_ERROR: 'NETWORK_ERROR',
+  TIMEOUT_ERROR: 'TIMEOUT_ERROR',
+  CONNECTION_ERROR: 'CONNECTION_ERROR',
   NOT_FOUND: 'NOT_FOUND',
   UNAUTHORIZED: 'UNAUTHORIZED',
   FORBIDDEN: 'FORBIDDEN',
   VALIDATION_ERROR: 'VALIDATION_ERROR',
   SERVER_ERROR: 'SERVER_ERROR',
   UNKNOWN_ERROR: 'UNKNOWN_ERROR'
+}
+
+// User-friendly error messages
+export const ERROR_MESSAGES = {
+  [ERROR_CODES.NETWORK_ERROR]: 'Unable to connect to the server. Please check your internet connection and try again.',
+  [ERROR_CODES.TIMEOUT_ERROR]: 'The request took too long to complete. Please try again.',
+  [ERROR_CODES.CONNECTION_ERROR]: 'Connection failed. Please check your internet connection and try again.',
+  [ERROR_CODES.NOT_FOUND]: 'The requested resource was not found.',
+  [ERROR_CODES.UNAUTHORIZED]: 'You are not authorized to perform this action. Please log in and try again.',
+  [ERROR_CODES.FORBIDDEN]: 'You do not have permission to perform this action.',
+  [ERROR_CODES.VALIDATION_ERROR]: 'Please check the form and fix the errors before submitting.',
+  [ERROR_CODES.SERVER_ERROR]: 'A server error occurred. Please try again later.',
+  [ERROR_CODES.UNKNOWN_ERROR]: 'An unexpected error occurred. Please try again.'
 }
 
 // HTTP Status Codes
