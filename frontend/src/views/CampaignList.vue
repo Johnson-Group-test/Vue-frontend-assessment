@@ -28,6 +28,14 @@
         <span id="search-hint" class="sr-only">Type to filter campaigns by name</span>
       </div>
 
+      <!-- Success notification -->
+      <SuccessAlert
+        v-if="showSuccess"
+        message="Campaign created successfully!"
+        :auto-dismiss="5000"
+        @dismiss="handleSuccessDismiss"
+      />
+
       <div
         aria-live="polite"
         :aria-busy="loading"
@@ -77,16 +85,18 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useCampaignsStore } from '@/stores/campaigns'
 import { storeToRefs } from 'pinia'
 import { useDebounce } from '@/composables'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
+import SuccessAlert from '@/components/common/SuccessAlert.vue'
 import CampaignCard from '@/components/campaign/CampaignCard.vue'
 import { FORM_DEFAULTS } from '@/constants'
 
+const route = useRoute()
 const router = useRouter()
 const store = useCampaignsStore()
 
@@ -95,6 +105,9 @@ const { loading, error, searchQuery, filteredCampaigns } = storeToRefs(store)
 
 // Local search query for immediate UI update
 const localSearchQuery = ref(store.searchQuery)
+
+// Success notification state
+const showSuccess = ref(false)
 
 // Sync local query with store
 watch(() => store.searchQuery, (newQuery) => {
@@ -123,9 +136,36 @@ const handleCampaignClick = (campaign) => {
   router.push(`/campaigns/${campaign.id}`)
 }
 
+// Handle success notification
+const handleSuccessDismiss = () => {
+  showSuccess.value = false
+  // Clear query parameter from URL
+  if (route.query.success) {
+    router.replace({ query: {} })
+  }
+}
+
+// Check for success query parameter
+const checkSuccessQuery = () => {
+  if (route.query.success === 'created') {
+    showSuccess.value = true
+    // Clear query parameter from URL immediately
+    router.replace({ query: {} })
+  }
+}
+
+// Watch for route query changes
+watch(() => route.query.success, (success) => {
+  if (success === 'created') {
+    showSuccess.value = true
+    router.replace({ query: {} })
+  }
+})
+
 // Fetch campaigns on mount
 onMounted(() => {
   fetchCampaigns()
+  checkSuccessQuery()
 })
 
 // Cleanup debounce on unmount

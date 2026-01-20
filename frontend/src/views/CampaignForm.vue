@@ -332,14 +332,20 @@ const submitForm = async () => {
       // Update existing campaign
       await store.updateCampaign(route.params.id, campaignData)
 
-      // Redirect to campaign detail page
-      router.push(`/campaigns/${route.params.id}`)
+      // Redirect to campaign detail page with success query parameter
+      router.push({
+        path: `/campaigns/${route.params.id}`,
+        query: { success: 'updated' }
+      })
     } else {
       // Create new campaign
       await store.createCampaign(campaignData)
 
-      // Redirect to campaign list
-      router.push('/')
+      // Redirect to campaign list with success query parameter
+      router.push({
+        path: '/',
+        query: { success: 'created' }
+      })
     }
   } catch (err) {
     // Handle API errors

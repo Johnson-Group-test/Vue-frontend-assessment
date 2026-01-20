@@ -3,6 +3,14 @@
     <div class="container">
       <BackButton to="/" label="Back to Campaigns" />
 
+      <!-- Success notification -->
+      <SuccessAlert
+        v-if="showSuccess"
+        message="Campaign updated successfully!"
+        :auto-dismiss="5000"
+        @dismiss="handleSuccessDismiss"
+      />
+
       <div
         aria-live="polite"
         :aria-busy="loading"
@@ -164,7 +172,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCampaignsStore } from '@/stores/campaigns'
 import { storeToRefs } from 'pinia'
@@ -172,6 +180,7 @@ import { useFormatters } from '@/composables'
 import BackButton from '@/components/common/BackButton.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorAlert from '@/components/common/ErrorAlert.vue'
+import SuccessAlert from '@/components/common/SuccessAlert.vue'
 import PageHeader from '@/components/layout/PageHeader.vue'
 import StatusBadge from '@/components/campaign/StatusBadge.vue'
 import MetricCard from '@/components/campaign/MetricCard.vue'
@@ -182,6 +191,9 @@ const store = useCampaignsStore()
 
 // Use store state
 const { loading, error, notFound, currentCampaign } = storeToRefs(store)
+
+// Success notification state
+const showSuccess = ref(false)
 
 // Campaign from store
 const campaign = computed(() => currentCampaign.value)
@@ -206,9 +218,28 @@ const fetchCampaign = () => {
   }
 }
 
+// Handle success notification
+const handleSuccessDismiss = () => {
+  showSuccess.value = false
+  // Clear query parameter from URL
+  if (route.query.success) {
+    router.replace({ query: {} })
+  }
+}
+
+// Check for success query parameter
+const checkSuccessQuery = () => {
+  if (route.query.success === 'updated') {
+    showSuccess.value = true
+    // Clear query parameter from URL immediately
+    router.replace({ query: {} })
+  }
+}
+
 // Fetch campaign on component mount
 onMounted(() => {
   fetchCampaign()
+  checkSuccessQuery()
 })
 
 // Watch for route parameter changes
@@ -217,6 +248,17 @@ watch(
   (newId) => {
     if (newId) {
       fetchCampaign()
+    }
+  }
+)
+
+// Watch for route query changes (success notification)
+watch(
+  () => route.query.success,
+  (success) => {
+    if (success === 'updated') {
+      showSuccess.value = true
+      router.replace({ query: {} })
     }
   }
 )
@@ -233,6 +275,8 @@ watch(
       // Clear current campaign and force fresh fetch when coming back from edit
       store.clearCurrentCampaign()
       fetchCampaign()
+      // Check for success query after navigation
+      checkSuccessQuery()
     }
   }
 )
