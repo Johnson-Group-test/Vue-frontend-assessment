@@ -45,7 +45,6 @@
               >
                 Edit Campaign
               </router-link>
-              <StatusBadge :status="campaign.status" size="md" />
             </template>
           </PageHeader>
 
