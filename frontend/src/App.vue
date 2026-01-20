@@ -1,19 +1,25 @@
 <template>
   <div id="app">
-    <header class="app-header">
+    <header class="app-header" role="banner">
       <div class="container">
         <h1>Campaign Dashboard</h1>
-        <nav>
-          <router-link to="/">Campaigns</router-link>
+        <nav role="navigation" aria-label="Main navigation">
+          <router-link
+            to="/"
+            aria-label="View all campaigns"
+            :aria-current="$route.path === '/' ? 'page' : undefined"
+          >
+            Campaigns
+          </router-link>
         </nav>
       </div>
     </header>
     
-    <main class="app-main">
+    <main class="app-main" role="main" id="main-content">
       <router-view />
     </main>
     
-    <footer class="app-footer">
+    <footer class="app-footer" role="contentinfo">
       <div class="container">
         <p>&copy; 2024 Johnson Group - Frontend Developer Assessment</p>
       </div>
@@ -22,15 +28,14 @@
 </template>
 
 <script setup>
-// App component - Main layout wrapper
 </script>
 
 <style scoped>
 .app-header {
-  background: #1a1a1a;
-  color: white;
+  background: var(--color-gray-900);
+  color: var(--color-white);
   padding: 1rem 0;
-  border-bottom: 2px solid #333;
+  border-bottom: 2px solid var(--color-gray-800);
 }
 
 .app-header .container {
@@ -45,10 +50,11 @@
 .app-header h1 {
   margin: 0;
   font-size: 1.5rem;
+  color: var(--color-white);
 }
 
 .app-header nav a {
-  color: white;
+  color: var(--color-white);
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -57,7 +63,7 @@
 
 .app-header nav a:hover,
 .app-header nav a.router-link-active {
-  background: #333;
+  background: var(--color-gray-800);
 }
 
 .app-main {
